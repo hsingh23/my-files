@@ -1,3 +1,3 @@
 # My-files
 
-Be bold
+Be bold and free
