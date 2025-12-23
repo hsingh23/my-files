@@ -1,0 +1,113 @@
+taxonomy = {
+"Basic Stitches": [
+"knit","purl","slip","slip purlwise with yarn in front","no stitch","grey no stitch","k tbl","p tbl","k1 below","p1 below"
+],
+"Knit Increases":[
+"m1","m1 right leaning","m1 left leaning","knit into fb","knit into fbf","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
+"increase 1 to 3","increase 1 to 4","increase 1 to 5","increase 1 to 6","increase 1 to 7","increase 1 to 8","increase 1 to 9",
+"right-leaning lifted increase","left-leaning lifted increase"
+],
+"Purl Increases":[
+"m1 purlwise","m1 purlwise right leaning","m1 purlwise left leaning","purl into fb","purl into fbf","(p1, k1) in 1 stitch",
+"(p1, k1, p1) in 1 stitch","right-leaning lifted increase purl","left-leaning lifted increase purl"
+],
+"Yarn Over Increases":[
+"yo","yo twice","yo 3 times","yo 4 times","yo 5 times","yo 6 times","yo 7 times","yo 8 times","yo 9 times",
+"(k1, yo, k1) in 1 stitch","(p1, yo, p1) in 1 stitch"
+],
+"Knit Decreases":[
+"k2tog","ssk","sl1, k1, psso","k3tog","sssk","sl1, k2tog, psso","sl2, k1, p2sso","central double decrease",
+"sl2, k2tog, p2sso","k4tog","k5tog","k6tog","k7tog","k8tog","k9tog",
+"decrease 4 to 1","decrease 5 to 1","decrease 6 to 1","decrease 7 to 1","decrease 8 to 1","decrease 9 to 1",
+"twisted k2tog","twisted ssk","twisted cdd","bunny ears outward","bunny ears inward"
+],
+"Purl Decreases":[
+"p2tog","p2tog tbl","ssp","p3tog","p3tog tbl","sssp","p2tog, sl1 wyif, psso","sl2, p1, p2sso",
+"central double decrease purl","sl1 wyif, p2tog tbl, psso","twisted p2tog","twisted ssp"
+],
+"Miscellaneous":[
+"k1 elongated","p1 elongated","k1 elongated twice","p1 elongated twice","k1 elongated thrice","p1 elongated thrice",
+"bobble","cast on","bind off","cluster 2 sts","cluster 3 sts","cluster 4 sts","cluster 5 sts",
+"place marker","slip marker","move marker 1 stitch left","move marker 1 stitch right",
+"move marker 2 stitches left","move marker 2 stitches right",
+"left twist purl braid","right twist purl braid","short row left","short row right","catch strands"
+],
+"2 Stitch Cables":[
+"1/1 RC","1/1 LC","1/1 RPC","1/1 LPC","1/1 RT","1/1 LT","1/1 RPT","1/1 LPT","2 stitch custom cable"
+],
+"3 Stitch Cables":[
+"2/1 RC","2/1 LC","1/2 RC","1/2 LC","2/1 RPC","2/1 LPC","1/2 RPC","1/2 LPC",
+"1/1/1 RC","1/1/1 LC","1/1/1 RPC","1/1/1 LPC","1/1/1 RRC","1/1/1 LRC",
+"2/1 RT","2/1 LT","2/1 RPT","2/1 LPT","1/2 RT","1/2 LT","1/2 RPT","1/2 LPT","1/1/1 RPT","1/1/1 LPT",
+"3 stitch custom cable"
+],
+"4 Stitch Cables":[
+"2/2 RC","2/2 LC","2/2 RPC","2/2 LPC","1/3 RC","1/3 LC","1/3 RPC","1/3 LPC","3/1 RC","3/1 LC","3/1 RPC","3/1 LPC",
+"1/2/1 RC","1/2/1 LC","1/2/1 RPC","1/2/1 LPC",
+"2/2 RT","2/2 LT","2/2 RPT","2/2 LPT","1/3 RT","1/3 LT","1/3 RPT","1/3 LPT",
+"4 stitch custom cable"
+],
+"5 Stitch Cables":[
+"2/3 RC","2/3 LC","2/3 RPC","2/3 LPC","3/2 RC","3/2 LC","3/2 RPC","3/2 LPC",
+"4/1 RC","4/1 LC","4/1 RPC","4/1 LPC","1/4 RC","1/4 LC","1/4 RPC","1/4 LPC",
+"2/1/2 RC","2/1/2 LC","2/1/2 RPC","2/1/2 LPC","1/3/1 RC","1/3/1 LC","1/3/1 RPC","1/3/1 LPC",
+"5 stitch custom cable"
+],
+"6 Stitch Cables":[
+"3/3 RC","3/3 LC","3/3 RPC","3/3 LPC","2/4 RC","2/4 LC","2/4 RPC","2/4 LPC","4/2 RC","4/2 LC","4/2 RPC","4/2 LPC",
+"2/2/2 RC","2/2/2 LC","2/2/2 RPC","2/2/2 LPC","2/2/2 RRC","2/2/2 LRC","6 stitch custom cable"
+],
+"7 Stitch Cables":[
+"3/4 RC","3/4 LC","3/4 RPC","3/4 LPC","4/3 RC","4/3 LC","4/3 RPC","4/3 LPC",
+"3/1/3 RC","3/1/3 LC","3/1/3 RPC","3/1/3 LPC","7 stitch custom cable"
+],
+"8 Stitch Cables":[
+"4/4 RC","4/4 LC","4/4 RPC","4/4 LPC","3/2/3 RC","3/2/3 LC","3/2/3 RPC","3/2/3 LPC","3/2/3 RRC","3/2/3 LRC",
+"8 stitch custom cable"
+],
+"9 Stitch Cables":[
+"3/3/3 RC","3/3/3 LC","3/3/3 RPC","3/3/3 LPC","3/3/3 RRC","3/3/3 LRC",
+"4/1/4 RC","4/1/4 LC","4/1/4 RPC","4/1/4 LPC","9 stitch custom cable"
+],
+"10 Stitch Cables":[
+"5/5 RC","5/5 LC","10 stitch custom cable"
+],
+"11 Stitch Cables":[
+"11 stitch custom cable"
+],
+"12 Stitch Cables":[
+"6/6 RC","6/6 LC","4/4/4 RC","4/4/4 LC","4/4/4 RPC","4/4/4 LPC","4/4/4 RRC","4/4/4 LRC","12 stitch custom cable"
+],
+"Estonian Gathered Stitches":[
+"2 into 2 gathered","3 into 3 gathered","6 into 2 gathered","5 into 5 gathered","3 into 7 gathered","7 into 5 gathered",
+"2 into 2 gathered tbl","2 into 3 gathered tbl","3 into 3 gathered tbl","4 into 3 gathered tbl","5 into 3 gathered tbl",
+"2 into 5 gathered tbl","3 into 5 gathered tbl","5 into 5 gathered tbl","7 into 5 gathered tbl","9 into 5 gathered tbl",
+"2 into 9 gathered tbl","3 into 9 gathered tbl","5 into 9 gathered tbl","7 into 9 gathered tbl","9 into 9 gathered tbl",
+"5 into 11 gathered tbl","3 into 7 gathered tbl"
+],
+"Estonian Increases":[
+"inc 1 to 3 tbl","inc 1 to 4 tbl","inc 1 to 5 tbl","inc 1 to 6 tbl","inc 1 to 7 tbl","inc 1 to 8 tbl","inc 1 to 9 tbl"
+],
+"Estonian Decreases":[
+"k2tog tbl","k3tog tbl","k4tog tbl","k5tog tbl","k6tog tbl","k7tog tbl","k8tog tbl","k9tog tbl","k2tog-nupp","ssk-nupp"
+],
+"More Estonian Stitches":[
+"nupp","N stitch","Reverse N stitch","k2tog-nupp","ssk-nupp"
+],
+"Brioche Stitches":[
+"brk","brp","yf sl1yo","yf sl1yo plus","brk2tog","brssk","brk3tog","brsssk","brkyobrk","brk tbl","yf sl2yo",
+"brcdd","brcdd purl","br4st inc","brssp","brp2tog","brsssp","brp3tog"
+],
+"Beaded Stitches":[
+"knit and bead","purl and bead","beaded yarn over","beaded 2 yarn over","beaded 3 yarn over","beaded 4 yarn over",
+"bead last stitch","hook bead","beaded central double decrease"
+],
+"Twined Stitches":[
+"twined knit","twined purl","twined purl reverse twist","hook stitch end","hook stitch strand","hook stitch start","hook stitch middle",
+"hook 3 stitches","hook 5 stitches","hook 7 stitches"
+],
+"V2 Old Stitches":[
+"knit into fb old","knit into fbf old","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
+"increase 1 to 3 old","increase 1 to 4 old","increase 1 to 5 old","increase 1 to 6 old","increase 1 to 7 old","increase 1 to 8 old"
+]
+}
