@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & Metadata -->
+    <title>Stitch Studio - Design Your Next Masterpiece | AI Pattern Generator</title>
+    <meta name="description" content="Stitch Studio is the all-in-one digital workspace for knitting, cross-stitch, and quilting. Turn any image into a pattern with AI in seconds. Offline-first and GitHub synced.">
+    <meta name="keywords" content="knitting software, cross-stitch generator, quilting design tool, AI pattern maker, pixel art to pattern, embroidery software, stitch studio">
+    <meta name="author" content="Stitch Studio">
+    <link rel="canonical" href="https://stitchstudio.org">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stitchstudio.org/">
+    <meta property="og:title" content="Stitch Studio - Design Your Next Masterpiece">
+    <meta property="og:description" content="The all-in-one digital workspace for fiber artists. Turn photos into patterns instantly.">
+    <meta property="og:image" content="https://stitchstudio.org/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://stitchstudio.org/">
+    <meta property="twitter:title" content="Stitch Studio - AI Pattern Design Tool">
+    <meta property="twitter:description" content="Turn any image into a stitch-perfect pattern in seconds.">
+    <meta property="twitter:image" content="https://stitchstudio.org/og-image.png">
+
+    <!-- Favicon (Inlined SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMyRDVBMjciIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICA8cGF0aCBkPSJNMzAgMjAgQzMwIDIwIDcwIDIwIDcwIDU1IEM3MCA5MCAzMCA5MCAzMCA1NSBDMzAgMzAgNTUgMzUgNTUgMjAiIC8+CiAgPGxpbmUgeDE9IjMwIiB5MT0iMjAiIHgyPSIzMCIgeTI9IjUiIHN0cm9rZT0iI0UyNzI1QiIgLz4KICA8Y2lyY2xlIGN4PSIzMCIgY3k9IjUiIHI9IjMiIGZpbGw9IiNFMjcyNUIiIHN0cm9rZT0ibm9uZSIgLz4KPC9zdmc+">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Custom Animations */
+        .animate-bounce-slow { animation: bounce 3s infinite; }
+        .animate-spin-slow { animation: spin 4s linear infinite; }
+        
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(-5%); } 50% { transform: translateY(5%); } }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Utility for reveal text hidden state */
+        .reveal-inner {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Stitch path drawing effect */
+        .stitch-path-draw {
+            stroke-dasharray: 20 10;
+            stroke-dashoffset: 1000;
+        }
+
+        /* Modal Transitions */
+        .modal {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFCF0] text-gray-900 selection:bg-[#E2725B] selection:text-white overflow-x-hidden">
+
+    <!-- URGENCY BAR (Relative positioning so it pushes content down) -->
+    <div class="relative bg-[#B91C1C] text-white py-2 px-4 text-center text-sm md:text-base font-medium z-50 flex flex-col md:flex-row justify-center items-center gap-2 shadow-lg">
+        <span class="flex items-center gap-2 animate-pulse font-bold">
+            <i data-lucide="star" class="w-4 h-4 fill-white"></i> 
+            Christmas Flash Sale: Save 68%
+        </span>
+        <span class="hidden md:inline text-white/50 mx-2">|</span>
+        <span id="countdown" class="font-mono bg-black/20 px-2 py-0.5 rounded text-xs md:text-sm">
+            00d : 00h : 00m : 00s
+        </span>
+        <button onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })" class="ml-0 md:ml-4 underline hover:text-[#FDFCF0] transition-colors cursor-pointer font-bold text-xs uppercase tracking-wider">
+            Claim Deal
+        </button>
+    </div>
+
+    <!-- NAVIGATION (Sticky so it scrolls with page but sticks to top) -->
+    <nav id="navbar" class="sticky top-0 w-full z-40 transition-all duration-300 py-4 bg-[#FDFCF0]/95 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 group cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <!-- Animated Logo Container -->
+                    <div id="logo-container" class="w-10 h-10 bg-[#2D5A27] rounded-lg flex items-center justify-center overflow-hidden">
+                        <!-- Simple 'S' Logo for Stitch Studio -->
+                        <svg id="logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-[#FDFCF0]">
+                            <path class="logo-path" d="M7 6c0-2 2-3 4-3s5 2 5 6c0 5-6 4-6 9s3 5 6 5s5-3 5-5" />
+                        </svg>
+                    </div>
+                    <span class="font-serif font-bold text-2xl text-[#2D5A27] tracking-tight">Stitch Studio</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#features" class="text-gray-700 hover:text-[#E2725B] font-medium transition-colors relative group">Features<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#E2725B] transition-all group-hover:w-full"></span></a>
+                    <a href="#success-stories" class="text-gray-700 hover:text-[#E2725B] font-medium transition-colors relative group">Success Stories<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#E2725B] transition-all group-hover:w-full"></span></a>
+                    <a href="#faq" class="text-gray-700 hover:text-[#E2725B] font-medium transition-colors relative group">FAQ<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#E2725B] transition-all group-hover:w-full"></span></a>
+                    <button onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })" class="bg-[#2D5A27] hover:bg-[#1a3517] text-white px-6 py-2.5 rounded-full font-medium transition-all transform hover:scale-105 hover:shadow-lg flex items-center gap-2">
+                        Get Started <i data-lucide="chevron-down" class="w-4 h-4 rotate-[-90deg]"></i>
+                    </button>
+                </div>
+
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-[#2D5A27] p-2">
+                        <i data-lucide="menu" class="w-7 h-7"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#FDFCF0] border-t border-gray-100 absolute w-full shadow-xl">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#features" class="block px-3 py-3 text-lg font-medium text-gray-700 hover:bg-[#2D5A27]/5 rounded-md">Features</a>
+                <a href="#success-stories" class="block px-3 py-3 text-lg font-medium text-gray-700 hover:bg-[#2D5A27]/5 rounded-md">Success Stories</a>
+                <a href="#pricing" class="block px-3 py-3 text-lg font-medium text-gray-700 hover:bg-[#2D5A27]/5 rounded-md">Pricing</a>
+                <button onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })" class="w-full text-left px-3 py-3 text-lg font-bold text-[#E2725B] bg-[#E2725B]/10 rounded-md mt-2">
+                    Get Lifetime Access
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section id="hero" class="relative min-h-[90vh] flex items-center pt-12 overflow-hidden bg-[#FDFCF0]">
+            <!-- Dynamic Background Blobs -->
+            <div id="blob1" class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#2D5A27]/5 rounded-full blur-[100px] pointer-events-none mix-blend-multiply"></div>
+            <div id="blob2" class="absolute bottom-[10%] right-[-5%] w-[400px] h-[400px] bg-[#E2725B]/10 rounded-full blur-[80px] pointer-events-none mix-blend-multiply"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Text Content -->
+                    <div class="text-center lg:text-left">
+                        <div class="inline-block mb-4 px-4 py-1.5 rounded-full bg-[#E2725B]/10 border border-[#E2725B]/20">
+                            <span class="text-[#E2725B] font-bold text-sm tracking-wide uppercase">New: AI Pattern Generator 2.0</span>
+                        </div>
+                        
+                        <h1 class="font-serif text-5xl md:text-7xl font-bold text-[#2D5A27] leading-[1.1] mb-6">
+                            <div class="mb-2 text-reveal" data-delay="0.2">Design Your Next</div>
+                            <div class="mb-2 text-reveal" data-delay="0.4">Masterpiece,</div>
+                            <span class="block mt-2 italic text-[#E2725B] text-reveal" data-delay="0.6">
+                                Stitch by Stitch.
+                            </span>
+                        </h1>
+                        
+                        <p class="text-xl text-gray-600 mb-8 max-w-lg mx-auto lg:mx-0 font-light leading-relaxed opacity-0" style="animation: fadeIn 1s ease-out 1.2s forwards;">
+                            The all-in-one digital workspace for knitting, cross-stitch, and quilting. 
+                            Turn any image into a pattern with AI in seconds.
+                        </p>
+
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 opacity-0" style="animation: fadeInUp 1s ease-out 1.4s forwards;">
+                            <button onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })" class="bg-[#2D5A27] text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:bg-[#1e3d1a] transition-all transform hover:-translate-y-1 w-full sm:w-auto">
+                                Get Lifetime Access $79.99
+                                <span class="block text-[10px] font-normal opacity-80 uppercase tracking-widest mt-0.5">Christmas Flash Sale</span>
+                            </button>
+                            
+                            <button class="flex items-center gap-2 text-[#2D5A27] font-semibold px-6 py-4 hover:bg-[#2D5A27]/5 rounded-full transition-colors w-full sm:w-auto justify-center">
+                                <i data-lucide="play-circle" class="w-6 h-6"></i>
+                                Watch Demo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Grid Visual -->
+                    <div class="relative perspective-1000 group">
+                        <div class="relative z-10 bg-white p-4 rounded-2xl shadow-2xl border-4 border-[#2D5A27]/10 transform transition-transform duration-700 rotate-y-12 rotate-x-6 group-hover:rotate-0">
+                            <!-- Toolbar Mockup -->
+                            <div class="flex gap-2 mb-4 border-b border-gray-100 pb-2">
+                                <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                <div class="ml-auto w-24 h-4 bg-gray-100 rounded-full"></div>
+                            </div>
+                            
+                            <!-- The Grid -->
+                            <div id="pixel-grid" class="grid grid-cols-12 gap-1 aspect-square bg-gray-50 p-2 rounded-lg cursor-crosshair">
+                                <!-- Pixels injected via JS -->
+                            </div>
+
+                            <!-- Floating Badge -->
+                            <div class="absolute -bottom-6 -right-6 bg-white px-6 py-4 rounded-xl shadow-xl border border-gray-100 flex items-center gap-3 animate-bounce-slow">
+                                <div class="bg-[#E2725B] p-2 rounded-lg text-white">
+                                    <i data-lucide="zap" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-400 font-bold uppercase">Generation Time</div>
+                                    <div class="text-[#2D5A27] font-mono font-bold">0.42s</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Decorative Background Element for Visual -->
+                        <div class="absolute top-10 right-10 w-full h-full bg-[#2D5A27] rounded-2xl -z-10 opacity-10 transform translate-x-4 translate-y-4"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scroll Down Indicator -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-[#2D5A27]/40 animate-bounce">
+                <i data-lucide="chevron-down" class="w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- PAIN & SOLUTION -->
+        <section id="pain-solution" class="py-32 bg-white relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-20">
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-gray-900 mb-6 flex justify-center">
+                        <div class="text-reveal">Why Designers Switch</div>
+                    </h2>
+                    <p class="text-gray-500 text-lg max-w-xl mx-auto">Stop struggling with graph paper and outdated desktop software.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-16 items-stretch">
+                    <!-- The Pain -->
+                    <div class="pain-solution-card group relative bg-red-50 rounded-[2rem] p-10 border-2 border-red-100/50 hover:border-red-200 transition-all duration-300 shadow-sm opacity-0">
+                        <div class="absolute -top-6 -left-6 bg-red-100 w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform z-10">😭</div>
+                        <h3 class="text-2xl font-serif font-bold text-red-900 mt-4 mb-8">The Old Way</h3>
+                        
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-4 text-red-900/80">
+                                <i data-lucide="x" class="w-5 h-5 flex-shrink-0 mt-1 text-red-500"></i>
+                                <span class="font-medium">Hand-drawing takes hours, mistakes are permanent.</span>
+                            </li>
+                            <li class="flex items-start gap-4 text-red-900/80">
+                                <i data-lucide="x" class="w-5 h-5 flex-shrink-0 mt-1 text-red-500"></i>
+                                <span class="font-medium">Desktop software is expensive, clunky & stuck in 1999.</span>
+                            </li>
+                            <li class="flex items-start gap-4 text-red-900/80">
+                                <i data-lucide="x" class="w-5 h-5 flex-shrink-0 mt-1 text-red-500"></i>
+                                <span class="font-medium">Losing your work because you forgot to hit 'Save'.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- The Solution -->
+                    <div class="pain-solution-card group relative bg-[#2D5A27] rounded-[2rem] p-10 shadow-2xl transform md:translate-y-12 opacity-0">
+                        <div class="absolute -top-6 -right-6 bg-[#E2725B] w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-lg text-white group-hover:rotate-12 transition-transform z-10">✨</div>
+                        <div class="absolute top-4 right-8 bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">STITCH STUDIO</div>
+                        
+                        <h3 class="text-2xl font-serif font-bold text-white mt-4 mb-8">The New Standard</h3>
+                        
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-4 text-white">
+                                <div class="bg-white/20 p-1 rounded-full mt-0.5"><i data-lucide="check" class="w-4 h-4"></i></div>
+                                <div>
+                                    <strong class="block text-lg">Instant AI Generation</strong>
+                                    <span class="text-green-100/70">Photos to patterns in seconds.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4 text-white">
+                                <div class="bg-white/20 p-1 rounded-full mt-0.5"><i data-lucide="check" class="w-4 h-4"></i></div>
+                                <div>
+                                    <strong class="block text-lg">Modern & Web-Based</strong>
+                                    <span class="text-green-100/70">Works on iPad, Laptop, and Phone.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4 text-white">
+                                <div class="bg-white/20 p-1 rounded-full mt-0.5"><i data-lucide="check" class="w-4 h-4"></i></div>
+                                <div>
+                                    <strong class="block text-lg">Offline First & Synced</strong>
+                                    <span class="text-green-100/70">IndexedDB + GitHub integration.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section id="features" class="py-32 bg-[#FDFCF0]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div class="max-w-2xl">
+                        <span class="text-[#E2725B] font-bold tracking-widest uppercase text-sm mb-2 block">How It Works</span>
+                        <h2 class="font-serif text-4xl md:text-5xl font-bold text-[#2D5A27]">Crafted for Modern Creators</h2>
+                    </div>
+                    <p class="text-gray-500 max-w-xs text-sm md:text-base">
+                        Everything you need to go from inspiration to finished object without the headache.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="features-grid">
+                    <!-- Feature Cards -->
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="zap" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">Magic AI Generation</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">Upload any photo and let Gemini AI create a stitch-perfect pattern mapped to DMC colors.</p>
+                    </div>
+
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="layers" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">Pro Grid Canvas</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">High-performance rendering with pan, zoom, and multi-layer support (colors + symbols).</p>
+                    </div>
+
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="github" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">GitHub Integration</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">Never lose a version. Sync your designs to your own private repository automatically.</p>
+                    </div>
+
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="palette" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">Custom Palettes</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">Generate harmonious color schemes from text prompts or images using AI.</p>
+                    </div>
+
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="wifi-off" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">Offline First</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">Keep designing even on a plane. Your work stays with you via IndexedDB.</p>
+                    </div>
+
+                    <div class="feature-card bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#2D5A27]/10 group opacity-0">
+                        <div class="w-14 h-14 bg-[#FDFCF0] rounded-2xl flex items-center justify-center text-[#2D5A27] mb-6 group-hover:scale-110 group-hover:bg-[#2D5A27] group-hover:text-white transition-all duration-300">
+                            <i data-lucide="download" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="font-bold text-xl mb-3 text-gray-900 font-serif">Universal Export</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm">Export to PDF, PNG, and machine-readable text formats for any machine.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section id="success-stories" class="py-32 bg-[#2D5A27] text-white relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 30px 30px;"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-8 backdrop-blur-sm border border-white/10">
+                            <i data-lucide="github" class="w-4 h-4"></i>
+                            <span class="text-sm font-medium">Community Driven Development</span>
+                        </div>
+                        <h2 class="font-serif text-4xl md:text-6xl font-bold mb-8 leading-tight">
+                            Trusted by 500+ <br/><span class="text-[#E2725B]">Fiber Artists</span>
+                        </h2>
+                        <p class="text-green-100/80 text-lg mb-10 max-w-md">
+                            Join a growing community of designers who treat their craft with the professional tools it deserves.
+                        </p>
+                        
+                        <div class="flex -space-x-4 mb-6">
+                            <div class="w-12 h-12 rounded-full border-2 border-[#2D5A27] bg-gray-300 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="w-full h-full bg-white"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-[#2D5A27] bg-gray-300 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" class="w-full h-full bg-white"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-[#2D5A27] bg-gray-300 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" class="w-full h-full bg-white"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-[#2D5A27] bg-gray-300 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=4" class="w-full h-full bg-white"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-[#2D5A27] bg-[#E2725B] flex items-center justify-center text-sm font-bold text-white">500+</div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute -top-10 -left-10 text-8xl text-white/10 font-serif">"</div>
+                        <div class="bg-white/10 backdrop-blur-lg p-10 rounded-3xl border border-white/20 shadow-2xl">
+                            <div class="flex gap-1 text-[#F4BE49] mb-6">
+                                <i data-lucide="star" class="w-6 h-6 fill-current"></i><i data-lucide="star" class="w-6 h-6 fill-current"></i><i data-lucide="star" class="w-6 h-6 fill-current"></i><i data-lucide="star" class="w-6 h-6 fill-current"></i><i data-lucide="star" class="w-6 h-6 fill-current"></i>
+                            </div>
+                            <p class="text-2xl font-light italic leading-relaxed mb-8 text-white">
+                                "Stitch Studio saved me 20 hours on my last quilting project! The AI generation feature is actual magic, not just a gimmick. It mapped perfectly to my DMC thread box."
+                            </p>
+                            <div class="flex items-center gap-4 border-t border-white/10 pt-6">
+                                <div class="w-14 h-14 bg-gray-200 rounded-full overflow-hidden border-2 border-[#E2725B]">
+                                    <img src="https://api.dicebear.com/7.x/micah/svg?seed=Sarah" alt="Sarah J" />
+                                </div>
+                                <div>
+                                    <div class="font-bold text-lg">Sarah Jenkins</div>
+                                    <div class="text-green-200 text-sm">Professional Fiber Artist</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING -->
+        <section id="pricing" class="py-32 bg-[#FDFCF0] relative overflow-hidden">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-6xl max-h-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#E2725B]/5 via-transparent to-transparent pointer-events-none"></div>
+
+            <div class="max-w-5xl mx-auto px-4 relative z-10">
+                <div class="text-center mb-16">
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-[#2D5A27] mb-6">One Payment. Forever Yours.</h2>
+                    <p class="text-gray-600 text-lg">No subscriptions. No hidden fees. Just pure creative freedom.</p>
+                </div>
+
+                <div id="pricing-card" class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border-4 border-[#2D5A27] relative opacity-0">
+                    <div class="absolute top-0 right-0">
+                        <div class="w-32 h-32 overflow-hidden absolute -top-2 -right-2">
+                            <div class="absolute top-0 left-0 bg-[#E2725B] text-white font-bold py-1 px-10 transform translate-x-8 translate-y-8 rotate-45 shadow-md text-sm">
+                                SAVE 68%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#2D5A27] text-white text-center py-4 text-sm font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2">
+                        <i data-lucide="star" class="w-4 h-4 animate-spin-slow"></i>
+                        Christmas Flash Sale Active
+                        <i data-lucide="star" class="w-4 h-4 animate-spin-slow"></i>
+                    </div>
+                    
+                    <div class="p-8 md:p-16 grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-8">
+                            <div>
+                                <div class="flex items-baseline gap-3 mb-2">
+                                    <span class="text-6xl md:text-7xl font-bold text-[#2D5A27]">$79.99</span>
+                                    <span class="text-3xl text-gray-300 line-through decoration-red-400 font-serif">$250</span>
+                                </div>
+                                <p class="text-[#E2725B] font-bold text-lg flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-[#E2725B] animate-pulse"></span>
+                                    Limited Time Offer
+                                </p>
+                            </div>
+                            
+                            <button class="w-full bg-[#E2725B] hover:bg-[#d1614b] text-white font-bold py-5 px-8 rounded-2xl text-xl transition-all transform hover:scale-[1.02] shadow-xl hover:shadow-[#E2725B]/30 flex items-center justify-center gap-3 group">
+                                Get Lifetime Access
+                                <i data-lucide="mouse-pointer-2" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                            
+                            <div class="flex items-center justify-center gap-2 text-xs text-gray-400">
+                                <div class="w-full h-px bg-gray-200"></div>
+                                <span class="whitespace-nowrap">30-Day Money Back Guarantee</span>
+                                <div class="w-full h-px bg-gray-200"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                            <h4 class="font-bold text-gray-900 mb-6 text-lg">Everything in Studio:</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">Unlimited AI Pattern Generations</span></div>
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">Unlimited GitHub Sync</span></div>
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">Full Stitch Symbol Library</span></div>
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">Export to PDF, PNG & Text</span></div>
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">Lifetime Updates & Support</span></div>
+                                <div class="flex items-center gap-3 group"><div class="w-6 h-6 rounded-full bg-[#2D5A27] flex items-center justify-center flex-shrink-0 text-white group-hover:scale-110 transition-transform"><i data-lucide="check" class="w-3.5 h-3.5"></i></div><span class="text-gray-700 font-medium">No Monthly Subscriptions</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="py-32 bg-white">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="font-serif text-3xl font-bold text-[#2D5A27] mb-12 text-center">Frequently Asked Questions</h2>
+                <div class="space-y-4" id="faq-container">
+                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <button class="w-full flex items-center justify-between p-6 text-left bg-white hover:bg-gray-50 transition-colors">
+                            <span class="font-bold text-gray-800 text-lg">Is this a monthly subscription?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-[#E2725B] transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                            <div class="p-6 pt-0 text-gray-600 bg-white leading-relaxed">No! This is a one-time lifetime access fee. You pay once and own it forever, including all future updates.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <button class="w-full flex items-center justify-between p-6 text-left bg-white hover:bg-gray-50 transition-colors">
+                            <span class="font-bold text-gray-800 text-lg">Do I need an internet connection?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-[#E2725B] transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                            <div class="p-6 pt-0 text-gray-600 bg-white leading-relaxed">No, Stitch Studio follows an 'Offline First' architecture. You can work completely offline using IndexedDB. Internet is only required for AI generation and GitHub syncing.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <button class="w-full flex items-center justify-between p-6 text-left bg-white hover:bg-gray-50 transition-colors">
+                            <span class="font-bold text-gray-800 text-lg">What types of patterns can I make?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-[#E2725B] transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                            <div class="p-6 pt-0 text-gray-600 bg-white leading-relaxed">Currently, the engine is optimized for Knitting, Cross-Stitch, and Quilting grid patterns. Crochet graphgans are also supported.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <button class="w-full flex items-center justify-between p-6 text-left bg-white hover:bg-gray-50 transition-colors">
+                            <span class="font-bold text-gray-800 text-lg">Where is my data stored?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-[#E2725B] transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                            <div class="p-6 pt-0 text-gray-600 bg-white leading-relaxed">Locally in your browser and optionally synced to your private GitHub repository. You own your data 100%.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MANIFESTO TICKER -->
+        <section id="manifesto-section" class="h-screen bg-[#FDFCF0] overflow-hidden flex items-center relative border-t border-[#2D5A27]/5"> 
+            
+            <!-- BACKGROUND DECORATION LAYER -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden select-none">
+                <svg class="absolute top-[15%] left-0 w-[200%] h-20 opacity-20 bg-parallax-slow" viewBox="0 0 1000 50" preserveAspectRatio="none">
+                    <path d="M0,25 Q50,0 100,25 T200,25 T300,25 T400,25 T500,25 T600,25 T700,25 T800,25 T900,25 T1000,25" class="stroke-[#2D5A27] stroke-2 fill-none stitch-path-draw" />
+                </svg>
+
+                <div class="absolute top-[20%] left-[10%] text-[#E2725B]/20 bg-parallax-slow transform rotate-12">
+                   <i data-lucide="scissors" class="w-[120px] h-[120px]"></i>
+                </div>
+                <div class="absolute bottom-[20%] left-[40%] text-[#2D5A27]/10 bg-parallax-fast transform -rotate-12">
+                   <i data-lucide="layers" class="w-[180px] h-[180px]"></i>
+                </div>
+                <div class="absolute top-[30%] left-[60%] text-[#E2725B]/20 bg-parallax-slow transform rotate-45">
+                   <i data-lucide="zap" class="w-[100px] h-[100px]"></i>
+                </div>
+                 <div class="absolute bottom-[10%] left-[85%] text-[#2D5A27]/10 bg-parallax-fast">
+                   <i data-lucide="palette" class="w-[140px] h-[140px]"></i>
+                </div>
+            </div>
+
+            <!-- SCROLLING CONTENT -->
+            <div id="manifesto-track" class="flex items-center gap-4 px-12 md:px-24 whitespace-nowrap min-w-max relative z-10">
+                <span class="font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] leading-none flex-none">From a fleeting</span>
+
+                <svg width="150" height="80" viewBox="0 0 100 50" class="text-[#E2725B] stroke-current fill-none stroke-2 mx-4 floating-icon flex-none">
+                    <path d="M0,50 C30,50 30,0 60,0 C90,0 90,50 120,50" />
+                </svg>
+
+                <span class="split-word font-serif italic text-[4rem] md:text-[8rem] text-[#2D5A27] font-bold flex-none" data-word="Thought"></span>
+
+                <span class="font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] opacity-60 ml-8 flex-none">to a finished</span>
+
+                <div class="bg-[#E2725B] p-4 rounded-full text-white mx-8 floating-icon shadow-lg flex-none">
+                   <i data-lucide="star" class="w-12 h-12 fill-current"></i>
+                </div>
+
+                <span class="split-word font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] font-bold flex-none" data-word="Masterpiece,"></span>
+
+                <span class="font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] opacity-60 ml-8 flex-none">experience the pure</span>
+
+                <div class="text-[#E2725B] mx-6 floating-icon flex-none">
+                   <i data-lucide="heart" class="w-16 h-16 fill-current"></i>
+                </div>
+
+                <span class="split-word font-serif italic text-[4rem] md:text-[8rem] text-[#2D5A27] font-bold flex-none" data-word="Joy"></span>
+
+                <span class="font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] opacity-60 ml-8 flex-none">of design without</span>
+
+                <div class="mx-8 flex items-center floating-icon flex-none">
+                    <div class="w-32 h-2 bg-[#E2725B] rounded-full"></div>
+                    <i data-lucide="chevron-down" class="w-12 h-12 text-[#E2725B] -rotate-90 -ml-2"></i>
+                </div>
+
+                <span class="split-word font-serif text-[4rem] md:text-[8rem] text-[#2D5A27] font-bold mr-24 flex-none" data-word="Limits."></span>
+                
+                <div class="w-[50vw] flex-none"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#1a3517] text-white py-20 border-t border-white/5 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-12 mb-16">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-10 h-10 bg-[#FDFCF0] rounded-lg flex items-center justify-center text-[#2D5A27]">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-[#2D5A27]">
+                                <path d="M7 6c0-2 2-3 4-3s5 2 5 6c0 5-6 4-6 9s3 5 6 5s5-3 5-5" />
+                            </svg>
+                        </div>
+                        <span class="font-serif font-bold text-3xl">Stitch Studio</span>
+                    </div>
+                    <p class="text-green-100/60 max-w-sm mb-8 leading-relaxed">Empowering fiber artists with professional-grade digital tools. Built for reliability, designed for creativity.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-6 text-lg">Product</h4>
+                    <ul class="space-y-4 text-green-100/60">
+                        <li><a href="#features" class="hover:text-[#E2725B] transition-colors">Features</a></li>
+                        <li><a href="#success-stories" class="hover:text-[#E2725B] transition-colors">Success Stories</a></li>
+                        <li><a href="#pricing" class="hover:text-[#E2725B] transition-colors">Pricing</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-6 text-lg">Legal</h4>
+                    <ul class="space-y-4 text-green-100/60">
+                        <li><button onclick="openModal('privacy')" class="hover:text-[#E2725B] transition-colors text-left">Privacy Policy</button></li>
+                        <li><button onclick="openModal('terms')" class="hover:text-[#E2725B] transition-colors text-left">Terms of Service</button></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-green-100/40">
+                <p>&copy; 2024 Stitch Studio. All rights reserved.</p>
+                <p class="flex items-center gap-2">Made with 🧶 and ☕️ in the Cloud</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LEGAL MODALS -->
+    <div id="legal-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="p-8">
+                <h3 id="modal-title" class="font-serif text-3xl font-bold text-[#2D5A27] mb-6">Legal</h3>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p>All rights reserved.</p>
+                    <p class="mt-4">We don't spy on you but do collect data for bug tracking.</p>
+                    <p class="mt-4">Your data may be used for AI training if you use the Gemini free tier, but we don't store that data ourselves, and it's not used by <em>us</em> for any training.</p>
+                    <p class="mt-4">If you don't use AI features, then you're probably in the clear...</p>
+                    <p class="mt-4 text-xs italic text-gray-400">...except maybe GitHub will be scraped for AI. 🤖</p>
+                </div>
+                <button onclick="closeModal()" class="mt-8 bg-[#2D5A27] text-white px-6 py-2 rounded-full font-bold hover:bg-[#1a3517] transition-colors">Got it</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sticky Mobile CTA -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur border-t border-gray-200 p-4 z-50 flex items-center justify-between shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+        <div>
+            <span class="block text-xs text-gray-500 line-through">was $250</span>
+            <span class="font-bold text-xl text-[#2D5A27]">$79.99</span>
+        </div>
+        <button onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })" class="bg-[#E2725B] text-white font-bold py-2.5 px-6 rounded-full shadow-lg">
+            Buy Now
+        </button>
+    </div>
+
+    <!-- MAIN SCRIPT -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Register GSAP Plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* --- 1. COUNTDOWN TIMER --- */
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 3);
+
+        setInterval(() => {
+            const now = new Date();
+            const distance = deadline - now;
+            if (distance < 0) return;
+            
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            const el = document.getElementById('countdown');
+            if (el) el.innerText = 
+                `${String(d).padStart(2,'0')}d : ${String(h).padStart(2,'0')}h : ${String(m).padStart(2,'0')}m : ${String(s).padStart(2,'0')}s`;
+        }, 1000);
+
+        /* --- 2. MOBILE MENU --- */
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        /* --- 3. MODAL LOGIC --- */
+        function openModal(type) {
+            const modal = document.getElementById('legal-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (type === 'privacy') title.innerText = 'Privacy Policy';
+            else if (type === 'terms') title.innerText = 'Terms of Service';
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('legal-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on outside click
+        document.getElementById('legal-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'legal-modal') closeModal();
+        });
+
+        /* --- 4. TEXT REVEAL ANIMATION --- */
+        document.querySelectorAll('.text-reveal').forEach((el) => {
+            const text = el.innerText;
+            const delay = parseFloat(el.getAttribute('data-delay')) || 0;
+            el.innerHTML = '';
+            
+            text.split(' ').forEach(word => {
+                const wrapper = document.createElement('span');
+                wrapper.className = 'inline-block overflow-hidden relative mr-1';
+                const inner = document.createElement('span');
+                inner.className = 'reveal-inner inline-block';
+                inner.innerText = word;
+                wrapper.appendChild(inner);
+                el.appendChild(wrapper);
+            });
+
+            gsap.fromTo(el.querySelectorAll('.reveal-inner'), 
+                { y: "100%", opacity: 0 },
+                {
+                    y: "0%", opacity: 1, duration: 0.8, stagger: 0.03, delay: delay, ease: "power3.out",
+                    scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" }
+                }
+            );
+        });
+
+        /* --- 5. GRID PIXEL ANIMATION --- */
+        const grid = document.getElementById('pixel-grid');
+        for(let i=0; i<120; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'grid-pixel w-full h-full rounded-sm bg-gray-200 opacity-0 scale-50 transition-colors duration-300';
+            grid.appendChild(pixel);
+        }
+
+        const tlGrid = gsap.timeline({ repeat: -1, repeatDelay: 1 });
+        tlGrid.to(".grid-pixel", {
+            scale: 1, opacity: 1,
+            backgroundColor: (i) => {
+                const row = Math.floor(i / 12);
+                const col = i % 12;
+                const isHeart = (
+                    (row === 2 && (col === 2 || col === 3 || col === 8 || col === 9)) ||
+                    (row === 3 && (col === 1 || col === 4 || col === 7 || col === 10)) ||
+                    (row === 4 && (col === 1 || col === 5 || col === 6 || col === 10)) ||
+                    (row === 5 && (col === 2 || col === 9)) ||
+                    (row === 6 && (col === 3 || col === 8)) ||
+                    (row === 7 && (col === 4 || col === 7)) ||
+                    (row === 8 && (col === 5 || col === 6))
+                );
+                return isHeart ? "#E2725B" : "#F1F5F9";
+            },
+            stagger: { amount: 1.5, grid: [10, 12], from: "center" },
+            duration: 0.4, ease: "power1.inOut"
+        })
+        .to(".grid-pixel", { backgroundColor: "#F1F5F9", duration: 0.5, delay: 2 });
+
+        /* --- 6. ANIMATED LOGO --- */
+        const logoTimeline = gsap.timeline({ repeat: -1, repeatDelay: 5 });
+        logoTimeline.fromTo("#logo-svg", 
+            { rotation: 0 },
+            { rotation: 360, duration: 1.5, ease: "back.inOut(1.7)" }
+        );
+        // Simple hover effect on logo container
+        const logoContainer = document.getElementById('logo-container');
+        logoContainer.addEventListener('mouseenter', () => {
+            gsap.to("#logo-svg", { scale: 1.2, duration: 0.3, ease: "power2.out" });
+        });
+        logoContainer.addEventListener('mouseleave', () => {
+            gsap.to("#logo-svg", { scale: 1, duration: 0.3, ease: "power2.out" });
+        });
+
+        /* --- 7. PARALLAX HERO BLOBS --- */
+        gsap.to("#blob1", {
+            y: 100, scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 1 }
+        });
+        gsap.to("#blob2", {
+            y: -50, scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 1.5 }
+        });
+
+        /* --- 8. SCROLL ANIMATIONS --- */
+        gsap.utils.toArray(".pain-solution-card").forEach((card, i) => {
+            gsap.fromTo(card, 
+                { y: 50, opacity: 0, rotation: 3 },
+                {
+                    y: 0, opacity: 1, rotation: 0, duration: 0.8, delay: i * 0.2, ease: "power2.out",
+                    scrollTrigger: { trigger: "#pain-solution", start: "top 75%" }
+                }
+            );
+        });
+
+        gsap.fromTo(".feature-card", 
+            { autoAlpha: 0, y: 50 },
+            {
+                autoAlpha: 1, y: 0, stagger: 0.1, duration: 0.8, ease: "back.out(1.2)",
+                scrollTrigger: { trigger: "#features", start: "top 75%" }
+            }
+        );
+
+        gsap.from("#pricing-card", {
+            scrollTrigger: { trigger: "#pricing-card", start: "top 85%" },
+            y: 100, opacity: 0, duration: 1, ease: "elastic.out(1, 0.75)"
+        });
+
+        /* --- 9. FAQ ACCORDION --- */
+        document.querySelectorAll('.faq-item button').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                const isClosed = answer.style.maxHeight === '' || answer.style.maxHeight === '0px';
+                document.querySelectorAll('.faq-answer').forEach(el => el.style.maxHeight = '0px');
+                document.querySelectorAll('.faq-item i').forEach(el => el.classList.remove('rotate-180'));
+                if (isClosed) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    icon.classList.add('rotate-180');
+                }
+            });
+        });
+
+        /* --- 10. SPLIT WORD HELPER --- */
+        document.querySelectorAll('.split-word').forEach(el => {
+            const word = el.getAttribute('data-word');
+            el.innerHTML = '';
+            word.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.innerText = char;
+                span.className = 'inline-block transition-all duration-300 hover:-translate-y-4 hover:scale-110 hover:text-[#E2725B] hover:rotate-6 origin-bottom cursor-default';
+                span.style.transitionDelay = `${i * 30}ms`;
+                el.appendChild(span);
+            });
+        });
+
+        /* --- 11. MANIFESTO TICKER (FIXED) --- */
+        const manifestoSection = document.getElementById('manifesto-section');
+        const track = document.getElementById('manifesto-track');
+        
+        window.addEventListener('load', () => {
+            // Function based calc to ensure responsiveness
+            const getScrollLength = () => track.scrollWidth - window.innerWidth;
+
+            const tlTicker = gsap.timeline({
+                scrollTrigger: {
+                    trigger: manifestoSection,
+                    pin: true,
+                    scrub: 1,
+                    start: "top top",
+                    end: () => `+=${track.scrollWidth}`, // Scroll distance based on track width
+                    invalidateOnRefresh: true,
+                }
+            });
+
+            tlTicker.to(track, {
+                x: () => -getScrollLength(),
+                ease: "none"
+            });
+
+            // Parallax Background
+            tlTicker.to(".bg-parallax-slow", { x: () => -getScrollLength() * 0.4, ease: "none" }, 0);
+            tlTicker.to(".bg-parallax-fast", { x: () => -getScrollLength() * 1.5, ease: "none" }, 0);
+            tlTicker.to(manifestoSection, { backgroundColor: "#fff0ec", ease: "none" }, 0);
+            tlTicker.to(".stitch-path-draw", { strokeDashoffset: 0, ease: "none" }, 0);
+        });
+
+        // Floating Icons
+        gsap.to(".floating-icon", {
+            y: -30, rotation: 15, duration: 2.5, yoyo: true, repeat: -1, ease: "sine.inOut", stagger: 0.2
+        });
+
+    </script>
+</body>
+</html>
