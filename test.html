@@ -412,12 +412,12 @@
         </section>
 
         <!-- PRICING -->
-        <section id="pricing" class="py-32 bg-[#FDFCF0] relative overflow-hidden">
+        <section id="pricing" class="py-24 bg-[#FDFCF0] relative overflow-hidden">
             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-6xl max-h-screen bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#E2725B]/5 via-transparent to-transparent pointer-events-none"></div>
 
             <div class="max-w-5xl mx-auto px-4 relative z-10">
-                <div class="text-center mb-16">
-                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-[#2D5A27] mb-6">One Payment. Forever Yours.</h2>
+                <div class="text-center mb-10">
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-[#2D5A27] mb-4">One Payment. Forever Yours.</h2>
                     <p class="text-gray-600 text-lg">No subscriptions. No hidden fees. Just pure creative freedom.</p>
                 </div>
 
@@ -478,7 +478,7 @@
         </section>
 
         <!-- FAQ -->
-        <section id="faq" class="py-32 bg-white">
+        <section id="faq" class="py-24 bg-white">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="font-serif text-3xl font-bold text-[#2D5A27] mb-12 text-center">Frequently Asked Questions</h2>
                 <div class="space-y-4" id="faq-container">
@@ -542,6 +542,20 @@
                 </div>
                  <div class="absolute bottom-[10%] left-[85%] text-[#2D5A27]/10 bg-parallax-fast">
                    <i data-lucide="palette" class="w-[140px] h-[140px]"></i>
+                </div>
+                
+                <!-- NEW SVGs added for horizontal scroll richness -->
+                <div class="absolute top-[60%] left-[25%] text-[#2D5A27]/15 bg-parallax-slow transform -rotate-15">
+                   <i data-lucide="ruler" class="w-[90px] h-[90px]"></i>
+                </div>
+                <div class="absolute top-[10%] left-[80%] text-[#E2725B]/15 bg-parallax-fast transform rotate-12">
+                   <i data-lucide="pen-tool" class="w-[110px] h-[110px]"></i>
+                </div>
+                <div class="absolute bottom-[40%] left-[5%] text-[#2D5A27]/10 bg-parallax-slow transform rotate-90">
+                   <i data-lucide="component" class="w-[130px] h-[130px]"></i>
+                </div>
+                <div class="absolute top-[75%] left-[55%] text-[#E2725B]/10 bg-parallax-fast transform -rotate-6">
+                   <i data-lucide="grid" class="w-[150px] h-[150px]"></i>
                 </div>
             </div>
 
@@ -635,12 +649,8 @@
             </button>
             <div class="p-8">
                 <h3 id="modal-title" class="font-serif text-3xl font-bold text-[#2D5A27] mb-6">Legal</h3>
-                <div class="prose text-gray-600 leading-relaxed">
-                    <p>All rights reserved.</p>
-                    <p class="mt-4">We don't spy on you but do collect data for bug tracking.</p>
-                    <p class="mt-4">Your data may be used for AI training if you use the Gemini free tier, but we don't store that data ourselves, and it's not used by <em>us</em> for any training.</p>
-                    <p class="mt-4">If you don't use AI features, then you're probably in the clear...</p>
-                    <p class="mt-4 text-xs italic text-gray-400">...except maybe GitHub will be scraped for AI. 🤖</p>
+                <div id="modal-content" class="prose text-gray-600 leading-relaxed text-sm">
+                    <!-- Content injected via JS -->
                 </div>
                 <button onclick="closeModal()" class="mt-8 bg-[#2D5A27] text-white px-6 py-2 rounded-full font-bold hover:bg-[#1a3517] transition-colors">Got it</button>
             </div>
@@ -694,16 +704,51 @@
             });
         }
 
-        /* --- 3. MODAL LOGIC --- */
+        /* --- 3. LEGAL MODAL CONTENT & LOGIC --- */
+        const legalContent = {
+            privacy: `
+                <p class="font-bold mb-2">1. Data Collection & Privacy</p>
+                <p class="mb-4">At Stitch Studio, we prioritize your privacy. We <strong>do not spy on you</strong>. We collect minimal anonymous data solely for bug tracking and performance monitoring to ensure the app runs smoothly on your device.</p>
+                
+                <p class="font-bold mb-2">2. AI & Data Usage</p>
+                <p class="mb-4"><strong>We do not use your personal designs to train our models.</strong> However, please be aware that if you use the free tier of Gemini AI features, your inputs may be used by Google for training purposes as per their standard terms. We do not store this data ourselves.</p>
+                
+                <p class="font-bold mb-2">3. Local Storage</p>
+                <p class="mb-4">Stitch Studio is an "Offline First" application. Your patterns, palettes, and projects are stored locally on your device using IndexedDB. You own your data 100%.</p>
+                
+                <p class="font-bold mb-2">4. Third Party Integrations</p>
+                <p class="mb-4">If you choose to sync your work with GitHub, please note that public repositories on GitHub may be scraped by third parties for AI training. We recommend using private repositories for your proprietary designs.</p>
+            `,
+            terms: `
+                <p class="font-bold mb-2">1. Lifetime Access</p>
+                <p class="mb-4">"Lifetime Access" refers to the lifespan of the Stitch Studio product. You pay once and receive access to all current Pro features and future updates without any recurring monthly fees.</p>
+                
+                <p class="font-bold mb-2">2. Refund Policy</p>
+                <p class="mb-4">We offer a 30-day money-back guarantee. If you are not satisfied with Stitch Studio for any reason, contact support within 30 days of purchase for a full refund.</p>
+                
+                <p class="font-bold mb-2">3. User Responsibility</p>
+                <p class="mb-4">You retain full ownership of any patterns you generate. You are responsible for ensuring that the images you upload for pattern generation do not violate copyright laws.</p>
+                
+                <p class="font-bold mb-2">4. Limitation of Liability</p>
+                <p class="mb-4">Stitch Studio is provided "as is". While we strive for perfection, we cannot guarantee that every AI-generated pattern will be 100% free of artifacts. We are not liable for yarn purchased based on incorrect estimates.</p>
+            `
+        };
+
         function openModal(type) {
             const modal = document.getElementById('legal-modal');
             const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
             
-            if (type === 'privacy') title.innerText = 'Privacy Policy';
-            else if (type === 'terms') title.innerText = 'Terms of Service';
+            if (type === 'privacy') {
+                title.innerText = 'Privacy Policy';
+                content.innerHTML = legalContent.privacy;
+            } else if (type === 'terms') {
+                title.innerText = 'Terms of Service';
+                content.innerHTML = legalContent.terms;
+            }
             
             modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scroll
+            document.body.style.overflow = 'hidden'; 
         }
 
         function closeModal() {
@@ -712,7 +757,6 @@
             document.body.style.overflow = '';
         }
 
-        // Close modal on outside click
         document.getElementById('legal-modal').addEventListener('click', (e) => {
             if (e.target.id === 'legal-modal') closeModal();
         });
