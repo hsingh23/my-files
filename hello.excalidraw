@@ -25,11 +25,16 @@
         "type": 3
       },
       "seed": 1271422059,
-      "version": 14,
-      "versionNonce": 443257547,
+      "version": 15,
+      "versionNonce": 1353814063,
       "isDeleted": false,
-      "boundElements": [],
-      "updated": 1767271980410,
+      "boundElements": [
+        {
+          "id": "RiwBJoXZWgUPUAKQ0WWhC",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1767272978147,
       "link": null,
       "locked": false
     },
@@ -92,16 +97,20 @@
         "type": 3
       },
       "seed": 940366251,
-      "version": 42,
-      "versionNonce": 1625719307,
+      "version": 43,
+      "versionNonce": 652251247,
       "isDeleted": false,
       "boundElements": [
         {
           "type": "text",
           "id": "dsobJaMIgvAj31I3YVMPL"
+        },
+        {
+          "id": "RiwBJoXZWgUPUAKQ0WWhC",
+          "type": "arrow"
         }
       ],
-      "updated": 1767272039814,
+      "updated": 1767272978148,
       "link": null,
       "locked": false
     },
@@ -128,7 +137,7 @@
       "version": 7,
       "versionNonce": 779458661,
       "isDeleted": false,
-      "boundElements": null,
+      "boundElements": [],
       "updated": 1767272040998,
       "link": null,
       "locked": false,
@@ -141,6 +150,60 @@
       "originalText": "world",
       "autoResize": true,
       "lineHeight": 1.25
+    },
+    {
+      "id": "RiwBJoXZWgUPUAKQ0WWhC",
+      "type": "arrow",
+      "x": 1085.1950073242188,
+      "y": 320.1029052734375,
+      "width": 61.195556640625,
+      "height": 0.246826171875,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a4",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 52903599,
+      "version": 23,
+      "versionNonce": 1670230607,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1767272978148,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          61.195556640625,
+          0.246826171875
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "n1H6RtV4qjvS-7DIJkUWw",
+        "focus": -0.20634569694277827,
+        "gap": 5.02154541015625
+      },
+      "endBinding": {
+        "elementId": "SB66-MYa9UaC-Ec783CAo",
+        "focus": 0.13782716684276136,
+        "gap": 12.07421875
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
     }
   ],
   "appState": {
@@ -172,12 +235,7 @@
       "type": "selection",
       "customType": null,
       "locked": false,
-      "lastActiveTool": {
-        "type": "selection",
-        "customType": null,
-        "locked": false,
-        "lastActiveTool": null
-      }
+      "lastActiveTool": null
     },
     "penMode": false,
     "penDetected": false,
@@ -212,7 +270,9 @@
     "scrolledOutside": false,
     "scrollX": -203.69110107421875,
     "scrollY": 104.8939208984375,
-    "selectedElementIds": {},
+    "selectedElementIds": {
+      "RiwBJoXZWgUPUAKQ0WWhC": true
+    },
     "hoveredElementIds": {},
     "selectedGroupIds": {},
     "selectedElementsAreBeingDragged": false,
@@ -242,7 +302,32 @@
     "viewModeEnabled": false,
     "pendingImageElementId": null,
     "showHyperlinkPopup": false,
-    "selectedLinearElement": null,
+    "selectedLinearElement": {
+      "elementId": "RiwBJoXZWgUPUAKQ0WWhC",
+      "selectedPointsIndices": null,
+      "pointerDownState": {
+        "prevSelectedPointsIndices": null,
+        "lastClickedPoint": -1,
+        "lastClickedIsEndPoint": false,
+        "origin": null,
+        "segmentMidpoint": {
+          "value": null,
+          "index": null,
+          "added": false
+        }
+      },
+      "isDragging": false,
+      "lastUncommittedPoint": null,
+      "pointerOffset": {
+        "x": 0,
+        "y": 0
+      },
+      "startBindingElement": "keep",
+      "endBindingElement": "keep",
+      "hoverPointIndex": -1,
+      "segmentMidPointHoveredCoords": null,
+      "elbowed": false
+    },
     "snapLines": [],
     "originSnapOffset": null,
     "objectsSnapModeEnabled": false,
