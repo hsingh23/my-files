@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tabla Audio Link Generator</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; }
+    button { padding: 8px 14px; margin-right: 10px; }
+    pre { background: #f5f5f5; padding: 12px; max-height: 400px; overflow: auto; }
+  </style>
+</head>
+<body>
+
+<h2>Tabla Audio URL Generator</h2>
+
+<button onclick="generate()">Generate URLs</button>
+<button onclick="check()">Generate + Verify (HEAD)</button>
+
+<pre id="output"></pre>
+
+<script>
+const BASE =
+  "https://audio.spardhaschoolofmusic.com/music/tabla";
+
+const TAALS = [
+  "teen_taal",
+  "dadra",
+  "jhaptaal",
+  "kehrwa",
+  "roopak",
+  "ektaal",
+  "bhajani"
+];
+
+const KEYS = [
+  "c", "c_sharp", "d", "d_sharp", "e", "f", "f_sharp",
+  "g", "g_sharp", "a", "a_sharp", "b"
+];
+
+// Adjust as needed
+const BPM_RANGE = {
+  min: 80,
+  max: 200,
+  step: 5
+};
+
+function buildUrl(taal, key, bpm) {
+  return `${BASE}/${taal}/${key}/${bpm}bpm.mp3`;
+}
+
+function generate() {
+  const urls = [];
+
+  for (const taal of TAALS) {
+    for (const key of KEYS) {
+      for (
+        let bpm = BPM_RANGE.min;
+        bpm <= BPM_RANGE.max;
+        bpm += BPM_RANGE.step
+      ) {
+        urls.push(buildUrl(taal, key, bpm));
+      }
+    }
+  }
+
+  document.getElementById("output").textContent =
+    urls.join("\n");
+
+  console.log("Generated URLs:", urls);
+}
+
+async function check() {
+  const valid = [];
+
+  for (const taal of TAALS) {
+    for (const key of KEYS) {
+      for (
+        let bpm = BPM_RANGE.min;
+        bpm <= BPM_RANGE.max;
+        bpm += BPM_RANGE.step
+      ) {
+        const url = buildUrl(taal, key, bpm);
+        try {
+          const res = await fetch(url, { method: "HEAD" });
+          if (res.ok) valid.push(url);
+        } catch (_) {
+          // ignore
+        }
+      }
+    }
+  }
+
+  document.getElementById("output").textContent =
+    valid.join("\n");
+
+  console.log("Valid URLs:", valid);
+}
+</script>
+
+</body>
+</html>
