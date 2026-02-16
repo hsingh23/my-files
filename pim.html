@@ -50,6 +50,8 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
     .card .bd { padding: 12px 14px; }
     textarea {
@@ -81,6 +83,7 @@
       word-break: break-word;
       font-family: var(--mono);
       font-size: 12px;
+      line-height: 1.4;
     }
     .pill {
       font-family: var(--mono);
@@ -89,6 +92,7 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       color: var(--muted);
+      flex: none;
     }
     @media (max-width: 980px) {
       main { grid-template-columns: 1fr; }
@@ -98,17 +102,17 @@
 <body>
   <header>
     <h1>JSON → Zsh Downloader Script Generator</h1>
-    <p class="sub">Paste JSON and the script auto‑generates and downloads as <strong>language-level.zsh</strong>.</p>
+    <p class="sub">Paste JSON and the script auto-generates and downloads as <strong>language-level.zsh</strong>. Includes PDFs + reading audio, embeds cover art into lesson MP3s, and retries failures 30s later.</p>
   </header>
 
   <main>
     <section class="card">
       <div class="hd">
         <div>Paste JSON</div>
-        <div class="pill" id="countPill">0 lessons</div>
+        <div class="pill" id="countPill">0 items</div>
       </div>
       <div class="bd">
-        <textarea id="jsonInput" spellcheck="false"></textarea>
+        <textarea id="jsonInput" spellcheck="false" placeholder='Paste the JSON array here (like: [ { "languageName": "Korean", "level": 1, ... } ])'></textarea>
         <div class="status" id="parseStatus">Waiting for JSON…</div>
       </div>
     </section>
@@ -144,14 +148,20 @@
 
     function safeFile(s) {
       return String(s || '')
+        .trim()
         .replace(/[\s]+/g, '_')
         .replace(/[^a-zA-Z0-9._-]+/g, '_')
         .replace(/_+/g, '_')
         .replace(/^_+|_+$/g, '') || 'course';
     }
 
+    function safeSlug(s) {
+      return safeFile(s).toLowerCase().replace(/_/g, '-');
+    }
+
     function pad2(n) {
-      const s = String(n);
+      const s = String(n ?? '');
+      if (!s) return '00';
       return s.length === 1 ? '0' + s : s;
     }
 
@@ -159,54 +169,160 @@
       return String(s ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     }
 
-    function buildScript(courses) {
+    function computeName(courses) {
       const c0 = courses[0] || {};
-      const language = safeFile(c0.languageName || 'language').toLowerCase();
-      const level = safeFile('level_' + (c0.level ?? '1')).toLowerCase();
-      const root = `${language}_${level}`;
+      const lang = safeSlug(c0.languageName || 'language');
+      const lvl = (c0.level ?? 1);
+      // required: lang-level.zsh (example: korean-level1.zsh)
+      const base = `${lang}-level${safeFile(lvl).replace(/[^0-9]/g, '') || lvl}`;
+      return base;
+    }
 
-      const script = [];
-      script.push('#!/bin/zsh');
-      script.push('set -euo pipefail');
-      script.push(`ROOT="${root}"`);
-      script.push('JOBS=8');
-      script.push('UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"');
-      script.push('mkdir -p "$ROOT/Lessons"');
-      script.push('');
-      script.push('run_limited() {');
-      script.push('  while (( $(jobs -pr | wc -l | tr -d " ") >= JOBS )); do sleep 0.1; done');
-      script.push('  "$@" &');
-      script.push('}');
-      script.push('');
-      script.push('fetch() { curl -A "$UA" -L --retry 5 --fail -o "$2" "$1"; }');
-      script.push('');
-      script.push('embed() {');
-      script.push('  dir="$1"; base="$2"; img="$3"; mp3="$4"');
-      script.push('  mkdir -p "$dir"');
-      script.push('  fetch "$img" "$dir/cover.jpg"');
-      script.push('  fetch "$mp3" "$dir/$base.mp3"');
-      script.push('  ffmpeg -y -loglevel error -i "$dir/$base.mp3" -i "$dir/cover.jpg" -map 0:a -map 1:v -c copy -disposition:v attached_pic "$dir/tmp.mp3"');
-      script.push('  mv -f "$dir/tmp.mp3" "$dir/$base.mp3"');
-      script.push('  rm -f "$dir/cover.jpg"');
-      script.push('}');
-      script.push('');
+    function buildScript(courses) {
+      const base = computeName(courses);
+      const ROOT = base;
 
       let lessonCount = 0;
+      let readingCount = 0;
+      let pdfCount = 0;
+
+      const lines = [];
+      lines.push('#!/bin/zsh');
+      // No -e: we want to keep going and retry failures after.
+      lines.push('set -u');
+      lines.push('set -o pipefail');
+      lines.push('');
+      lines.push(`ROOT="${escapeDq(ROOT)}"`);
+      lines.push('JOBS=${JOBS:-8}');
+      lines.push('UA="Mozilla/5.0"');
+      lines.push('FAILS_FILE="$ROOT/_failed.tsv"');
+      lines.push('FAILS2_FILE="$ROOT/_failed_after_retry.tsv"');
+      lines.push('mkdir -p "$ROOT/Lessons" "$ROOT/Readings" "$ROOT/PDFs"');
+      lines.push('rm -f "$FAILS_FILE" "$FAILS2_FILE"');
+      lines.push('');
+
+      lines.push('run_limited() {');
+      lines.push('  while (( $(jobs -pr | wc -l | tr -d " ") >= JOBS )); do sleep 0.1; done');
+      lines.push('  "$@" &');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('queue_fail() {');
+      lines.push('  # TSV: TYPE \t arg1 \t arg2 \t arg3 \t arg4');
+      lines.push('  print -r -- "$1\t$2\t$3\t$4\t$5" >> "$FAILS_FILE"');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('fetch_once() {');
+      lines.push('  url="$1"; out="$2"');
+      lines.push('  mkdir -p "${out:h}" 2>/dev/null || true');
+      lines.push('  curl -A "$UA" -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 0 -o "$out" "$url"');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('try_fetch() {');
+      lines.push('  url="$1"; out="$2"');
+      lines.push('  if ! fetch_once "$url" "$out"; then');
+      lines.push('    queue_fail "FETCH" "$url" "$out" "" ""');
+      lines.push('    return 0');
+      lines.push('  fi');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('embed_once() {');
+      lines.push('  dir="$1"; base="$2"; img="$3"; mp3="$4"');
+      lines.push('  mkdir -p "$dir"');
+      lines.push('  fetch_once "$img" "$dir/cover.jpg"');
+      lines.push('  fetch_once "$mp3" "$dir/$base.mp3"');
+      lines.push('  ffmpeg -y -loglevel error -i "$dir/$base.mp3" -i "$dir/cover.jpg" -map 0:a -map 1:v -c copy -disposition:v attached_pic "$dir/tmp.mp3"');
+      lines.push('  mv -f "$dir/tmp.mp3" "$dir/$base.mp3"');
+      lines.push('  rm -f "$dir/cover.jpg"');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('try_embed() {');
+      lines.push('  dir="$1"; base="$2"; img="$3"; mp3="$4"');
+      lines.push('  if ! embed_once "$dir" "$base" "$img" "$mp3"; then');
+      lines.push('    # best-effort cleanup so retries start fresh');
+      lines.push('    rm -f "$dir/cover.jpg" "$dir/tmp.mp3" 2>/dev/null || true');
+      lines.push('    queue_fail "EMBED" "$dir" "$base" "$img" "$mp3"');
+      lines.push('    return 0');
+      lines.push('  fi');
+      lines.push('}');
+      lines.push('');
+
+      lines.push('# --- queue downloads (parallel) ---');
+
       for (const course of courses) {
-        if (Array.isArray(course.lessons)) {
-          for (const lesson of course.lessons) {
-            lessonCount++;
-            const num = pad2(lesson.lessonNumber || lessonCount);
-            if (!lesson.audioLink) continue;
-            const img = lesson?.image?.fullImageAddress || '';
-            script.push(`run_limited embed "$ROOT/Lessons/L${num}" "lesson_${num}" "${escapeDq(img)}" "${escapeDq(lesson.audioLink)}"`);
+        const lessons = Array.isArray(course.lessons) ? course.lessons : [];
+        for (const lesson of lessons) {
+          const num = pad2(lesson.lessonNumber || (++lessonCount));
+          const img = lesson?.image?.fullImageAddress || '';
+          const mp3 = lesson?.audioLink || '';
+          if (!mp3 || !img) continue;
+          lessonCount++;
+          lines.push(`run_limited try_embed "$ROOT/Lessons/L${num}" "lesson_${num}" "${escapeDq(img)}" "${escapeDq(mp3)}"`);
+        }
+
+        const readings = course.readings || {};
+        if (readings.puReadingAlphabetPdf) {
+          pdfCount++;
+          lines.push(`run_limited try_fetch "${escapeDq(readings.puReadingAlphabetPdf)}" "$ROOT/PDFs/alphabet.pdf"`);
+        }
+        if (readings.puReadingIntroPdf) {
+          pdfCount++;
+          lines.push(`run_limited try_fetch "${escapeDq(readings.puReadingIntroPdf)}" "$ROOT/PDFs/intro.pdf"`);
+        }
+
+        if (Array.isArray(readings.audios)) {
+          for (const r of readings.audios) {
+            if (!r.audioLink) continue;
+            readingCount++;
+            const order = pad2(r.order || readingCount);
+            lines.push(`run_limited try_fetch "${escapeDq(r.audioLink)}" "$ROOT/Readings/reading_${order}.mp3"`);
           }
         }
       }
 
-      script.push('wait');
-      script.push('echo "Done."');
-      return { script: script.join('\n'), root };
+      lines.push('wait');
+      lines.push('');
+
+      lines.push('# --- retry failures after everything else finishes ---');
+      lines.push('if [[ -s "$FAILS_FILE" ]]; then');
+      lines.push('  echo "Some downloads failed. Will retry in 30 seconds..."');
+      lines.push('  echo "Failed list: $FAILS_FILE"');
+      lines.push('  sleep 30');
+      lines.push('  while IFS=$"\t" read -r typ a b c d; do');
+      lines.push('    [[ -z "$typ" ]] && continue');
+      lines.push('    if [[ "$typ" == "FETCH" ]]; then');
+      lines.push('      if ! fetch_once "$a" "$b"; then');
+      lines.push('        print -r -- "$typ\t$a\t$b\t\t" >> "$FAILS2_FILE"');
+      lines.push('      fi');
+      lines.push('    elif [[ "$typ" == "EMBED" ]]; then');
+      lines.push('      if ! embed_once "$a" "$b" "$c" "$d"; then');
+      lines.push('        rm -f "$a/cover.jpg" "$a/tmp.mp3" 2>/dev/null || true');
+      lines.push('        print -r -- "$typ\t$a\t$b\t$c\t$d" >> "$FAILS2_FILE"');
+      lines.push('      fi');
+      lines.push('    fi');
+      lines.push('  done < "$FAILS_FILE"');
+      lines.push('');
+      lines.push('  if [[ -s "$FAILS2_FILE" ]]; then');
+      lines.push('    echo "Still failing after retry:"');
+      lines.push('    cat "$FAILS2_FILE"');
+      lines.push('    echo "(You can re-run the script, or manually retry entries from that file.)"');
+      lines.push('  else');
+      lines.push('    echo "All previously-failed items succeeded on retry."');
+      lines.push('    rm -f "$FAILS_FILE"');
+      lines.push('  fi');
+      lines.push('else');
+      lines.push('  echo "Done."');
+      lines.push('fi');
+
+      return {
+        script: lines.join('\n'),
+        base,
+        counts: { lesson: lessonCount, reading: readingCount, pdf: pdfCount }
+      };
     }
 
     function downloadText(filename, text) {
@@ -224,30 +340,37 @@
     function handleInput() {
       const raw = jsonInput.value.trim();
       if (!raw) {
+        parseStatus.className = 'status';
         parseStatus.textContent = 'Waiting for JSON…';
         preview.textContent = '';
-        countPill.textContent = '0 lessons';
+        countPill.textContent = '0 items';
+        previewPill.textContent = 'auto';
+        runSteps.textContent = '';
         return;
       }
       try {
         const data = JSON.parse(raw);
-        if (!Array.isArray(data)) throw new Error('Top-level JSON must be array');
+        if (!Array.isArray(data)) throw new Error('Top-level JSON must be an array: [ { ... } ]');
 
-        const { script, root } = buildScript(data);
-        const filename = `${root}.zsh`;
+        const { script, base, counts } = buildScript(data);
+        const filename = `${base}.zsh`;
 
         preview.textContent = script;
         previewPill.textContent = 'generated';
         parseStatus.className = 'status ok';
-        parseStatus.textContent = `Valid JSON. Script generated as ${filename} and downloaded.`;
-        countPill.textContent = (data[0]?.lessons?.length || 0) + ' lessons';
+        parseStatus.textContent = `Valid JSON. Script generated and downloaded as ${filename}.`;
+
+        countPill.textContent = `${counts.lesson} lessons · ${counts.reading} readings · ${counts.pdf} PDFs`;
 
         downloadText(filename, script);
-        runSteps.textContent = `chmod +x ${filename}\n./${filename}`;
+        runSteps.textContent = `1) Put ${filename} in an empty folder\n2) chmod +x ${filename}\n3) ./${filename}\n\nNotes:\n- Needs ffmpeg (brew install ffmpeg)\n- Change parallelism: JOBS=12 ./${filename}`;
       } catch (e) {
         parseStatus.className = 'status bad';
         parseStatus.textContent = e.message;
         preview.textContent = '';
+        previewPill.textContent = 'auto';
+        countPill.textContent = '0 items';
+        runSteps.textContent = '';
       }
     }
 
