@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JSON → Zsh Downloader Script Generator</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #121a2a;
+      --muted: #9fb0d0;
+      --text: #eaf0ff;
+      --accent: #6aa9ff;
+      --danger: #ff6a6a;
+      --ok: #58d68d;
+      --border: rgba(255,255,255,0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 800px at 20% 0%, #132042 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+    header {
+      padding: 24px 16px 8px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 { margin: 0; font-size: 20px; }
+    p.sub { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card .hd {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+    .card .bd { padding: 12px 14px; }
+    textarea {
+      width: 100%;
+      min-height: 420px;
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      resize: vertical;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .status.ok { border-color: rgba(88,214,141,0.35); color: rgba(88,214,141,0.95); }
+    .status.bad { border-color: rgba(255,106,106,0.35); color: rgba(255,106,106,0.95); }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JSON → Zsh Downloader Script Generator</h1>
+    <p class="sub">Paste JSON and the script auto‑generates and downloads as <strong>language-level.zsh</strong>.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="hd">
+        <div>Paste JSON</div>
+        <div class="pill" id="countPill">0 lessons</div>
+      </div>
+      <div class="bd">
+        <textarea id="jsonInput" spellcheck="false"></textarea>
+        <div class="status" id="parseStatus">Waiting for JSON…</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <div>How to run (macOS)</div>
+        <div class="pill">zsh</div>
+      </div>
+      <div class="bd">
+        <pre id="runSteps"></pre>
+      </div>
+    </section>
+
+    <section class="card" style="grid-column:1/-1;">
+      <div class="hd">
+        <div>Preview</div>
+        <div class="pill" id="previewPill">auto</div>
+      </div>
+      <div class="bd">
+        <pre id="scriptPreview"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const jsonInput = document.getElementById('jsonInput');
+    const parseStatus = document.getElementById('parseStatus');
+    const preview = document.getElementById('scriptPreview');
+    const previewPill = document.getElementById('previewPill');
+    const runSteps = document.getElementById('runSteps');
+    const countPill = document.getElementById('countPill');
+
+    function safeFile(s) {
+      return String(s || '')
+        .replace(/[\s]+/g, '_')
+        .replace(/[^a-zA-Z0-9._-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'course';
+    }
+
+    function pad2(n) {
+      const s = String(n);
+      return s.length === 1 ? '0' + s : s;
+    }
+
+    function escapeDq(s) {
+      return String(s ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    function buildScript(courses) {
+      const c0 = courses[0] || {};
+      const language = safeFile(c0.languageName || 'language').toLowerCase();
+      const level = safeFile('level_' + (c0.level ?? '1')).toLowerCase();
+      const root = `${language}_${level}`;
+
+      const script = [];
+      script.push('#!/bin/zsh');
+      script.push('set -euo pipefail');
+      script.push(`ROOT="${root}"`);
+      script.push('JOBS=8');
+      script.push('UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"');
+      script.push('mkdir -p "$ROOT/Lessons"');
+      script.push('');
+      script.push('run_limited() {');
+      script.push('  while (( $(jobs -pr | wc -l | tr -d " ") >= JOBS )); do sleep 0.1; done');
+      script.push('  "$@" &');
+      script.push('}');
+      script.push('');
+      script.push('fetch() { curl -A "$UA" -L --retry 5 --fail -o "$2" "$1"; }');
+      script.push('');
+      script.push('embed() {');
+      script.push('  dir="$1"; base="$2"; img="$3"; mp3="$4"');
+      script.push('  mkdir -p "$dir"');
+      script.push('  fetch "$img" "$dir/cover.jpg"');
+      script.push('  fetch "$mp3" "$dir/$base.mp3"');
+      script.push('  ffmpeg -y -loglevel error -i "$dir/$base.mp3" -i "$dir/cover.jpg" -map 0:a -map 1:v -c copy -disposition:v attached_pic "$dir/tmp.mp3"');
+      script.push('  mv -f "$dir/tmp.mp3" "$dir/$base.mp3"');
+      script.push('  rm -f "$dir/cover.jpg"');
+      script.push('}');
+      script.push('');
+
+      let lessonCount = 0;
+      for (const course of courses) {
+        if (Array.isArray(course.lessons)) {
+          for (const lesson of course.lessons) {
+            lessonCount++;
+            const num = pad2(lesson.lessonNumber || lessonCount);
+            if (!lesson.audioLink) continue;
+            const img = lesson?.image?.fullImageAddress || '';
+            script.push(`run_limited embed "$ROOT/Lessons/L${num}" "lesson_${num}" "${escapeDq(img)}" "${escapeDq(lesson.audioLink)}"`);
+          }
+        }
+      }
+
+      script.push('wait');
+      script.push('echo "Done."');
+      return { script: script.join('\n'), root };
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleInput() {
+      const raw = jsonInput.value.trim();
+      if (!raw) {
+        parseStatus.textContent = 'Waiting for JSON…';
+        preview.textContent = '';
+        countPill.textContent = '0 lessons';
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        if (!Array.isArray(data)) throw new Error('Top-level JSON must be array');
+
+        const { script, root } = buildScript(data);
+        const filename = `${root}.zsh`;
+
+        preview.textContent = script;
+        previewPill.textContent = 'generated';
+        parseStatus.className = 'status ok';
+        parseStatus.textContent = `Valid JSON. Script generated as ${filename} and downloaded.`;
+        countPill.textContent = (data[0]?.lessons?.length || 0) + ' lessons';
+
+        downloadText(filename, script);
+        runSteps.textContent = `chmod +x ${filename}\n./${filename}`;
+      } catch (e) {
+        parseStatus.className = 'status bad';
+        parseStatus.textContent = e.message;
+        preview.textContent = '';
+      }
+    }
+
+    jsonInput.addEventListener('input', handleInput);
+  </script>
+</body>
+</html>
