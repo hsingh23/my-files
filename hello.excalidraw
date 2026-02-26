@@ -482,9 +482,9 @@
     {
       "id": "evbeph1OYvN7DjCNuK8CU",
       "type": "text",
-      "x": 1159.6911010742188,
-      "y": 678.1060791015625,
-      "width": 265.39984130859375,
+      "x": 1159.462537586596,
+      "y": 677.8775156139397,
+      "width": 8,
       "height": 25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -499,20 +499,20 @@
       "index": "aA",
       "roundness": null,
       "seed": 1180033665,
-      "version": 4,
-      "versionNonce": 752322081,
-      "isDeleted": false,
+      "version": 7,
+      "versionNonce": 1238282052,
+      "isDeleted": true,
       "boundElements": [],
-      "updated": 1767346451174,
+      "updated": 1772106124108,
       "link": null,
       "locked": false,
-      "text": "  Make some changes here. ",
+      "text": "",
       "fontSize": 20,
       "fontFamily": 5,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "  Make some changes here. ",
+      "originalText": "",
       "autoResize": true,
       "lineHeight": 1.25
     },
@@ -759,16 +759,7 @@
       "version": 45,
       "versionNonce": 796524721,
       "isDeleted": true,
-      "boundElements": [
-        {
-          "type": "text",
-          "id": "xZeGb_z_uRlh2E84Nh36J"
-        },
-        {
-          "id": "sun5GqQVCPJZ-71hV0lIY",
-          "type": "arrow"
-        }
-      ],
+      "boundElements": [],
       "updated": 1771226584090,
       "link": null,
       "locked": false
@@ -1403,7 +1394,7 @@
   ],
   "appState": {
     "showWelcomeScreen": false,
-    "theme": "light",
+    "theme": "dark",
     "currentChartType": "bar",
     "currentItemBackgroundColor": "#ffec99",
     "currentItemEndArrowhead": "arrow",
@@ -1463,8 +1454,8 @@
     "previousSelectedElementIds": {},
     "resizingElement": null,
     "scrolledOutside": false,
-    "scrollX": 6202.218611687281,
-    "scrollY": 6023.723603376513,
+    "scrollX": -31.35703337030813,
+    "scrollY": 463.2257802437394,
     "selectedElementIds": {},
     "hoveredElementIds": {},
     "selectedGroupIds": {},
@@ -1490,7 +1481,7 @@
     "viewBackgroundColor": "#f5faff",
     "zenModeEnabled": false,
     "zoom": {
-      "value": 0.1
+      "value": 0.546894
     },
     "viewModeEnabled": false,
     "pendingImageElementId": null,
